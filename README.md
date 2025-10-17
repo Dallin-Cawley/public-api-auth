@@ -1,3 +1,2 @@
-# public-api-auth
-
-Common code structures for the api-auth service
+# api-auth-structs
+Contains important structs for the api-auth service
