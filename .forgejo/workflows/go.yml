@@ -6,7 +6,7 @@ jobs:
   test:
     runs-on: docker
     container:
-      image: git.championtourney.com/championtourney/forgejo_runner:latest
+      image: git.championtourney.com/championtourney/forgejo-runner:latest
 
     steps:
       - name: test
@@ -15,7 +15,7 @@ jobs:
   lint:
     runs-on: docker
     container:
-      image: git.championtourney.com/championtourney/forgejo_runner:latest
+      image: git.championtourney.com/championtourney/forgejo-runner:latest
 
     steps:
       - name: lint

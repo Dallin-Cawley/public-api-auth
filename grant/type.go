@@ -11,12 +11,14 @@ type Type int
 const (
 	ClientCredentials Type = iota
 	AuthorizationCode
+	Unsupported
 )
 
 var (
 	typeStringMap = map[string]Type{
 		ClientCredentials.String(): ClientCredentials,
 		AuthorizationCode.String(): AuthorizationCode,
+		Unsupported.String():       Unsupported,
 	}
 )
 
@@ -30,7 +32,7 @@ func MakeType(grantTypeStr string) (Type, error) {
 }
 
 func (grantType Type) String() string {
-	return []string{"client_credentials", "authorization_code"}[grantType]
+	return []string{"client_credentials", "authorization_code", "unsupported"}[grantType]
 }
 
 // MarshalJSON marshals the grant.Type on the value receiver to ensure that usages of grant.Type are

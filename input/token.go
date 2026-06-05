@@ -5,9 +5,9 @@ import "git.championtourney.com/championtourney/public-api-auth/grant"
 // CreateTokenInputBody represents the information necessary to create a token from information
 // generated via the Client Credentials Oauth2.0 flow.
 type CreateTokenInputBody struct {
-	ClientID     *string `json:"client_id" doc:"The client ID of the application when using the Client Credentials flow"`
-	ClientSecret *string `json:"client_secret" doc:"The client secret of the application when using the Client Credentials flow"`
-	GrantType    string  `json:"grant_type" enum:"client_credentials" doc:"The type of grant to issue"`
+	ClientID     *string `json:"client_id" schema:"client_id" doc:"The client ID of the application when using the Client Credentials flow"`
+	ClientSecret *string `json:"client_secret" schema:"client_secret" doc:"The client secret of the application when using the Client Credentials flow"`
+	GrantType    string  `json:"grant_type" schema:"grant_type" enum:"client_credentials" doc:"The type of grant to issue"`
 }
 
 // NewEmptyCreateTokenInputBody creates an empty input.CreateTokenInputBody

@@ -1,24 +1,23 @@
 package output
 
 import (
-	"git.championtourney.com/championtourney/public-api-auth/public"
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type GrantTestSuite struct {
 	suite.Suite
-	clientCredentials *public.ClientCredentialsGrant
 }
 
-func (testSuite *GrantTestSuite) SetupTest() {
-	testSuite.clientCredentials = public.NewClientCredentialsGrant("some id", "some secret")
-}
+func (testSuite *GrantTestSuite) Test_NewClientCredentialsOutputBody_Success() {
+	clientID := "some id"
+	clientSecret := "some secret"
+	body := NewClientCredentialsGrant(clientID, clientSecret)
 
-func (testSuite *GrantTestSuite) TestNewClientCredentialsOutputBody_Success() {
-	body := NewClientCredentialsOutputBody(*testSuite.clientCredentials)
-
-	testSuite.Equal(*testSuite.clientCredentials, body.Grant)
+	testSuite.NotNil(body)
+	testSuite.Equal(clientID, body.ClientID)
+	testSuite.Equal(clientSecret, body.ClientSecret)
 }
 
 func Test_RunGrantTestSuite(t *testing.T) {

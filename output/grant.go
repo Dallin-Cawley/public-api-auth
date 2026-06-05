@@ -1,17 +1,11 @@
 package output
 
-import (
-	"git.championtourney.com/championtourney/public-api-auth/public"
-)
-
-// ClientCredentialsOutputBody represents the response body for Oauth2.0 client credentials grant.
-type ClientCredentialsOutputBody struct {
-	Grant public.ClientCredentialsGrant `json:"grant" doc:"The client credentials grant for the application"`
+type ClientCredentialsGrant struct {
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
 }
 
-// NewClientCredentialsOutputBody creates a new instance of outputClientCredentialsOutputBody with the provided public.ClientCredentialsGrant.
-func NewClientCredentialsOutputBody(grant public.ClientCredentialsGrant) *ClientCredentialsOutputBody {
-	return &ClientCredentialsOutputBody{
-		Grant: grant,
-	}
+// NewClientCredentialsGrant creates a new output.ClientCredentialsGrant
+func NewClientCredentialsGrant(clientID, clientSecret string) *ClientCredentialsGrant {
+	return &ClientCredentialsGrant{ClientID: clientID, ClientSecret: clientSecret}
 }

@@ -1,17 +1,17 @@
 package input
 
-// ClientCredentialsInputBody represents the input sent to APIAuth when creating a new model.Application
-type ClientCredentialsInputBody struct {
-	ApplicationName string  `json:"application_name" doc:"The name of the application"`
-	CallbackURL     *string `json:"callback_url" doc:"The callback URL for the application. This will be used when emitting events related to tournaments created by the application"`
+import "git.championtourney.com/championtourney/public-api-auth/grant"
+
+// ClientCredentialsPayload represents a client credentials grant payload.
+type ClientCredentialsPayload struct {
+	GrantType grant.Type `json:"grant_type"`
+	OwnerID   string     `json:"owner_id"`
 }
 
-// NewEmptyClientCredentialsInputBody creates a new empty input.ClientCredentialsInputBody
-func NewEmptyClientCredentialsInputBody() *ClientCredentialsInputBody {
-	return &ClientCredentialsInputBody{}
-}
-
-// NewClientCredentialsInputBody creates an input.ClientCredentialsInputBody
-func NewClientCredentialsInputBody(applicationName string, callbackURL string) *ClientCredentialsInputBody {
-	return &ClientCredentialsInputBody{ApplicationName: applicationName, CallbackURL: &callbackURL}
+// NewClientCredentialsPayload creates a new instance of ClientCredentialsPayload with the provided grantType and ownerID.
+func NewClientCredentialsPayload(ownerID string) *ClientCredentialsPayload {
+	return &ClientCredentialsPayload{
+		GrantType: grant.ClientCredentials,
+		OwnerID:   ownerID,
+	}
 }

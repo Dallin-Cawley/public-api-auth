@@ -26,6 +26,13 @@ func (testSuite *TypeTestSuite) Test_MakeType_AuthorizationCode_Success() {
 	testSuite.Equal(AuthorizationCode, theGrant)
 }
 
+func (testSuite *TypeTestSuite) Test_MakeType_Unsupported_Success() {
+	theGrant, err := MakeType("unsupported")
+
+	testSuite.NoError(err)
+	testSuite.Equal(Unsupported, theGrant)
+}
+
 func (testSuite *TypeTestSuite) Test_MakeType_InvalidGrantType() {
 	theGrant, err := MakeType("invalid")
 
@@ -39,6 +46,10 @@ func (testSuite *TypeTestSuite) Test_String_ClientCredentials_Success() {
 
 func (testSuite *TypeTestSuite) Test_String_AuthorizationCode_Success() {
 	testSuite.Equal("authorization_code", AuthorizationCode.String())
+}
+
+func (testSuite *TypeTestSuite) Test_String_Unsupported_Success() {
+	testSuite.Equal("unsupported", Unsupported.String())
 }
 
 func (testSuite *TypeTestSuite) Test_MarshalJSON_Success() {

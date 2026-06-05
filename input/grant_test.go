@@ -1,33 +1,24 @@
 package input
 
 import (
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"git.championtourney.com/championtourney/public-api-auth/grant"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type GrantTestSuite struct {
 	suite.Suite
-	expectedApplicationName string
-	expectedCallbackURL     string
 }
 
-func (testSuite *GrantTestSuite) SetupTest() {
-	testSuite.expectedApplicationName = "some name"
-	testSuite.expectedCallbackURL = "some url"
-}
+func (testSuite *GrantTestSuite) Test_NewClientCredentialsPayload_Success() {
+	ownerID := "test-owner-id"
+	payload := NewClientCredentialsPayload(ownerID)
 
-func (testSuite *GrantTestSuite) TestNewEmptyClientCredentialsGrantBody_Success() {
-	body := NewEmptyClientCredentialsInputBody()
-
-	testSuite.Empty(body.ApplicationName)
-	testSuite.Nil(body.CallbackURL)
-}
-
-func (testSuite *GrantTestSuite) TestNewClientCredentialsGrantBody_Success() {
-	body := NewClientCredentialsInputBody(testSuite.expectedApplicationName, testSuite.expectedCallbackURL)
-
-	testSuite.Equal(testSuite.expectedApplicationName, body.ApplicationName)
-	testSuite.Equal(testSuite.expectedCallbackURL, *body.CallbackURL)
+	testSuite.NotNil(payload)
+	testSuite.Equal(ownerID, payload.OwnerID)
+	testSuite.Equal(grant.ClientCredentials, payload.GrantType)
 }
 
 func Test_RunGrantTestSuite(t *testing.T) {
