@@ -1,11 +1,22 @@
 package output
 
-// ValidateTokenOutputBody contains the structure of the output body for the /oauth/token/validate endpoint
-type ValidateTokenOutputBody struct {
-	ApplicationID int `json:"application_id" doc:"The application ID for whom the token was generated"`
+// ValidateOutputBody represents the output body of the api-auth service when verifying a
+// jwt token
+type ValidateOutputBody struct {
+	Subject   string   `json:"sub"`
+	IssuedAt  string   `json:"iat"`
+	ExpiresAt string   `json:"exp"`
+	JWTID     string   `json:"jti"`
+	Scopes    []string `json:"scope"`
 }
 
-// NewValidateTokenOutputBody creates the output body for the /oauth/token/validate endpoint
-func NewValidateTokenOutputBody(applicationID int) *ValidateTokenOutputBody {
-	return &ValidateTokenOutputBody{ApplicationID: applicationID}
+// NewValidateOutputBody creates a new ValidateOutputBody
+func NewValidateOutputBody(subject, issuedAt, expiresAt, jwtID string, scopes []string) *ValidateOutputBody {
+	return &ValidateOutputBody{
+		Subject:   subject,
+		IssuedAt:  issuedAt,
+		ExpiresAt: expiresAt,
+		JWTID:     jwtID,
+		Scopes:    scopes,
+	}
 }

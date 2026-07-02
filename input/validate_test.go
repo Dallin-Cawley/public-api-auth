@@ -14,8 +14,8 @@ func (testSuite *AuthenticateTestSuite) SetupTest() {
 	testSuite.expectedToken = "some token"
 }
 
-func (testSuite *AuthenticateTestSuite) TestNewEmptyAuthenticateTokenBody_Success() {
-	body := NewEmptyValidateTokenInputBody()
+func (testSuite *AuthenticateTestSuite) TestNewValidateTokenInputBody_Empty() {
+	body := NewValidateTokenInputBody("")
 
 	testSuite.Empty(body.AccessToken)
 }
