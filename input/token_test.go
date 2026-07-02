@@ -11,17 +11,11 @@ type TokenTestSuite struct {
 	suite.Suite
 }
 
-func (testSuite *TokenTestSuite) TestNewEmptyCreateClientCredentialsTokenInputBody_Success() {
-	body := NewEmptyCreateTokenInputBody()
-
-	testSuite.Empty(body)
-}
-
-func (testSuite *TokenTestSuite) TestNewCreateClientCredentialsTokenInputBody_Success() {
+func (testSuite *TokenTestSuite) TestNewCreateTokenInputBody_Success() {
 	expectedClientID := "some id"
 	expectedClientSecret := "some secret"
 
-	body := NewCreateClientCredentialsTokenInputBody(&expectedClientID, &expectedClientSecret)
+	body := NewCreateTokenInputBody(&expectedClientID, &expectedClientSecret)
 
 	testSuite.Equal(&expectedClientID, body.ClientID)
 	testSuite.Equal(&expectedClientSecret, body.ClientSecret)
@@ -31,11 +25,18 @@ func (testSuite *TokenTestSuite) TestNewCreateClientCredentialsTokenInputBody_Su
 func (testSuite *TokenTestSuite) TestGetGrantType_Success() {
 	expectedGrantType := grant.ClientCredentials
 
-	body := NewCreateClientCredentialsTokenInputBody(nil, nil)
+	body := NewCreateTokenInputBody(nil, nil)
 	theGrantType, err := body.GetGrantType()
 
-	testSuite.Nil(err)
+	testSuite.NoError(err)
 	testSuite.Equal(expectedGrantType, theGrantType)
+}
+
+func (testSuite *TokenTestSuite) TestGetGrantType_Failure() {
+	body := &CreateTokenInputBody{GrantType: "invalid"}
+	_, err := body.GetGrantType()
+
+	testSuite.ErrorContains(err, "invalid grant type")
 }
 
 func Test_RunTokenTestSuite(t *testing.T) {

@@ -1,25 +1,31 @@
 package output
 
 import (
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
-type AuthenticateTestSuite struct {
+type ValidateTestSuite struct {
 	suite.Suite
-	expectedApplicationID int
 }
 
-func (testSuite *AuthenticateTestSuite) SetupTest() {
-	testSuite.expectedApplicationID = 1
+func (testSuite *ValidateTestSuite) TestNewValidateOutputBody_Success() {
+	expectedSubject := "some-subject"
+	expectedIssuedAt := "some-iat"
+	expectedExpiresAt := "some-exp"
+	expectedJWTID := "some-jti"
+	expectedScopes := []string{"scope1", "scope2"}
+
+	outputBody := NewValidateOutputBody(expectedSubject, expectedIssuedAt, expectedExpiresAt, expectedJWTID, expectedScopes)
+
+	testSuite.Equal(expectedSubject, outputBody.Subject)
+	testSuite.Equal(expectedIssuedAt, outputBody.IssuedAt)
+	testSuite.Equal(expectedExpiresAt, outputBody.ExpiresAt)
+	testSuite.Equal(expectedJWTID, outputBody.JWTID)
+	testSuite.Equal(expectedScopes, outputBody.Scopes)
 }
 
-func (testSuite *AuthenticateTestSuite) TestNewAuthenticateTokenOutputBody_Success() {
-	outputBody := NewValidateTokenOutputBody(testSuite.expectedApplicationID)
-
-	testSuite.Equal(testSuite.expectedApplicationID, outputBody.ApplicationID)
-}
-
-func Test_RunAuthenticateTestSuite(t *testing.T) {
-	suite.Run(t, new(AuthenticateTestSuite))
+func Test_RunValidateTestSuite(t *testing.T) {
+	suite.Run(t, new(ValidateTestSuite))
 }

@@ -10,14 +10,8 @@ type CreateTokenInputBody struct {
 	GrantType    string  `json:"grant_type" schema:"grant_type" enum:"client_credentials" doc:"The type of grant to issue"`
 }
 
-// NewEmptyCreateTokenInputBody creates an empty input.CreateTokenInputBody
-func NewEmptyCreateTokenInputBody() *CreateTokenInputBody {
-	return &CreateTokenInputBody{}
-}
-
-// NewCreateClientCredentialsTokenInputBody creates an input.CreateTokenInputBody with the necessary information
-// to create a JWT token.
-func NewCreateClientCredentialsTokenInputBody(clientID, clientSecret *string) *CreateTokenInputBody {
+// NewCreateTokenInputBody creates a pointer to an input.CreateTokenInputBody
+func NewCreateTokenInputBody(clientID, clientSecret *string) *CreateTokenInputBody {
 	return &CreateTokenInputBody{ClientID: clientID, ClientSecret: clientSecret, GrantType: grant.ClientCredentials.String()}
 }
 

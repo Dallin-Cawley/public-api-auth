@@ -1,13 +1,5 @@
-git.championtourney.com/championtourney/errors v1.0.0 h1:dkKmUSeFHsBtGPjHTsV20TZHUeqGj6xZDuYUwmp3UDo=
-git.championtourney.com/championtourney/errors v1.0.0/go.mod h1:G6cxc9G3NuQANkzp9jJ5IBvedjNIgBeDGNlXR99R+HY=
-git.championtourney.com/championtourney/public v1.0.0 h1:0Lj66Cgc+hTAckGrw/PLiLR+um1h4u9SGHfDML69YBY=
-git.championtourney.com/championtourney/public v1.0.0/go.mod h1:zmT4opKNrQaKDsrx1GOQenXz3TKsTlS8WURhAd0q8nk=
-git.championtourney.com/championtourney/utils v1.0.0 h1:oRUBdLKMya6h1ZnVyn8wH5iOs0do4O/0mRqMhrxjyUw=
-git.championtourney.com/championtourney/utils v1.0.0/go.mod h1:d9ZMeXD4JnFFN8ODeSUPe1H8/57o1RPV3sfrc5Alti0=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
-github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
