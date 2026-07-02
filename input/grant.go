@@ -1,6 +1,6 @@
 package input
 
-import "git.championtourney.com/championtourney/public-api-auth/grant"
+import "github.com/Dallin-Cawley/public-api-auth/grant"
 
 // ClientCredentialsPayload represents a client credentials grant payload.
 type ClientCredentialsPayload struct {

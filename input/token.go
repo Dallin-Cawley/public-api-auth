@@ -1,6 +1,6 @@
 package input
 
-import "git.championtourney.com/championtourney/public-api-auth/grant"
+import "github.com/Dallin-Cawley/public-api-auth/grant"
 
 // CreateTokenInputBody represents the information necessary to create a token from information
 // generated via the Client Credentials Oauth2.0 flow.

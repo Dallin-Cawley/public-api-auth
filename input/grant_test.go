@@ -3,7 +3,7 @@ package input
 import (
 	"testing"
 
-	"git.championtourney.com/championtourney/public-api-auth/grant"
+	"github.com/Dallin-Cawley/public-api-auth/grant"
 
 	"github.com/stretchr/testify/suite"
 )

@@ -1,4 +1,4 @@
-module git.championtourney.com/championtourney/public-api-auth
+module github.com/Dallin-Cawley/public-api-auth
 
 go 1.25
 

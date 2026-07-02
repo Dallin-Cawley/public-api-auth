@@ -1,9 +1,10 @@
 package input
 
 import (
-	"git.championtourney.com/championtourney/public-api-auth/grant"
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/Dallin-Cawley/public-api-auth/grant"
+	"github.com/stretchr/testify/suite"
 )
 
 type TokenTestSuite struct {

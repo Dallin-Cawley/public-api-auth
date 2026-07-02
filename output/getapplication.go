@@ -1,6 +1,6 @@
 package output
 
-import "git.championtourney.com/championtourney/public-api-auth/public"
+import "github.com/Dallin-Cawley/public-api-auth/public"
 
 type GetApplicationOutputBody struct {
 	Application public.Application `json:"application" doc:"The application associated with the provided applicationID"`

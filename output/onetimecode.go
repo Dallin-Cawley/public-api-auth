@@ -1,6 +1,6 @@
 package output
 
-import "git.championtourney.com/championtourney/public-api-auth/public"
+import "github.com/Dallin-Cawley/public-api-auth/public"
 
 type GetOneTimeCodeMetaDataOutputBody struct {
 	MetaData public.OneTimeCodeMetadata `json:"meta_data" doc:"The meta data associated with the one time code"`

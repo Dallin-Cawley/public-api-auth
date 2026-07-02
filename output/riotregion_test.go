@@ -3,8 +3,8 @@ package output
 import (
 	"testing"
 
-	"git.championtourney.com/championtourney/public-api-auth/public"
 	"git.championtourney.com/championtourney/public/riot"
+	"github.com/Dallin-Cawley/public-api-auth/public"
 
 	"github.com/stretchr/testify/suite"
 )
