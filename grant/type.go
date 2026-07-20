@@ -6,6 +6,31 @@ import (
 	"strings"
 )
 
+type Types []Type
+
+func TypesFromString(stringTypes []string) (Types, error) {
+	var err error
+
+	types := make([]Type, len(stringTypes))
+	for i, stringType := range stringTypes {
+		types[i], err = MakeType(stringType)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse types: %w", err)
+		}
+	}
+
+	return types, nil
+}
+
+func (types Types) Strings() []string {
+	stringTypes := make([]string, len(types))
+	for i, theType := range types {
+		stringTypes[i] = theType.String()
+	}
+
+	return stringTypes
+}
+
 type Type int
 
 const (

@@ -11,25 +11,45 @@ type CredentialsTestSuite struct {
 	suite.Suite
 }
 
-func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsInputBody_Success() {
-	body := NewCreateCredentialsInputBody(grant.AuthorizationCode)
+func (testSuite *CredentialsTestSuite) TestNewInternalCreateCredentialsInputBody_Success() {
+	expectedClientID := "client_id"
+	expectedClientSecret := "client_secret"
 
-	testSuite.Equal([]string{grant.AuthorizationCode.String()}, body.GrantType)
+	body := NewInternalCreateCredentialsInputBody(grant.Types{grant.AuthorizationCode}, expectedClientID, expectedClientSecret)
+
+	testSuite.Equal([]string{grant.AuthorizationCode.String()}, body.GrantTypes)
+	testSuite.Equal(expectedClientID, body.ClientID)
+	testSuite.Equal(expectedClientSecret, body.ClientSecret)
 }
 
-func (testSuite *CredentialsTestSuite) TestGetGrantType_Success() {
-	body := NewCreateCredentialsInputBody(grant.ClientCredentials)
-	theGrantType, err := body.GetGrantType()
+func (testSuite *CredentialsTestSuite) TestCreateInternalCreateCredentialsInputBody_GetGrantTypes_Success() {
+	body := NewInternalCreateCredentialsInputBody(grant.Types{grant.AuthorizationCode}, "client_id", "client_secret")
+	theGrantType, err := body.GetGrantTypes()
+
+	testSuite.NoError(err)
+	testSuite.Equal([]grant.Type{grant.AuthorizationCode}, theGrantType)
+}
+
+func (testSuite *CredentialsTestSuite) TestInternalCreateCredentialsInputBody_GetGrantTypes_Success() {
+	body := &InternalCreateCredentialsInputBody{GrantTypes: []string{grant.ClientCredentials.String()}}
+	theGrantType, err := body.GetGrantTypes()
 
 	testSuite.NoError(err)
 	testSuite.Equal([]grant.Type{grant.ClientCredentials}, theGrantType)
 }
 
-func (testSuite *CredentialsTestSuite) TestGetGrantType_Failure() {
-	body := &CreateCredentialsInputBody{GrantType: []string{"invalid"}}
-	_, err := body.GetGrantType()
+func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsInputBody_Success() {
+	body := NewCreateCredentialsInputBody(grant.Types{grant.AuthorizationCode})
 
-	testSuite.ErrorContains(err, "invalid grant type")
+	testSuite.Equal([]string{grant.AuthorizationCode.String()}, body.GrantTypes)
+}
+
+func (testSuite *CredentialsTestSuite) TestCreateCredentialsInputBody_GetGrantTypes_Success() {
+	body := NewCreateCredentialsInputBody(grant.Types{grant.ClientCredentials})
+	theGrantType, err := body.GetGrantTypes()
+
+	testSuite.NoError(err)
+	testSuite.Equal([]grant.Type{grant.ClientCredentials}, theGrantType)
 }
 
 func Test_RunCredentialsTestSuite(t *testing.T) {
