@@ -18,7 +18,7 @@ func NewInternalCreateCredentialsInputBody(grantTypes grant.Types, clientID, cli
 }
 
 // GetGrantTypes retrieves the requested grant types.
-func (body *InternalCreateCredentialsInputBody) GetGrantTypes() ([]grant.Type, error) {
+func (body *InternalCreateCredentialsInputBody) GetGrantTypes() (grant.Types, error) {
 	return grant.TypesFromString(body.GrantTypes)
 }
 
@@ -34,6 +34,6 @@ func NewCreateCredentialsInputBody(grantTypes grant.Types) *CreateCredentialsInp
 }
 
 // GetGrantTypes retrieves the requested grant types.
-func (body *CreateCredentialsInputBody) GetGrantTypes() ([]grant.Type, error) {
+func (body *CreateCredentialsInputBody) GetGrantTypes() (grant.Types, error) {
 	return grant.TypesFromString(body.GrantTypes)
 }

@@ -12,6 +12,25 @@ type TypeTestSuite struct {
 	suite.Suite
 }
 
+func (testSuite *TypeTestSuite) TestTypesFromString_Success() {
+	theGrantTypes, err := TypesFromString([]string{"client_credentials", "authorization_code"})
+
+	testSuite.NoError(err)
+	testSuite.Equal(Types{ClientCredentials, AuthorizationCode}, theGrantTypes)
+}
+
+func (testSuite *TypeTestSuite) TestTypesFromString_InvalidGrantType() {
+	_, err := TypesFromString([]string{"invalid"})
+	testSuite.ErrorContains(err, "unable to parse types")
+}
+
+func (testSuite *TypeTestSuite) TestStrings_Success() {
+	testSuite.Equal(
+		[]string{"client_credentials", "authorization_code"},
+		Types{ClientCredentials, AuthorizationCode}.Strings(),
+	)
+}
+
 func (testSuite *TypeTestSuite) Test_MakeType_ClientCredentials_Success() {
 	theGrant, err := MakeType("client_credentials")
 
