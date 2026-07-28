@@ -8,11 +8,12 @@ import (
 // pair for use with either the Client Credentials or Authorization Code OAuth2.0 flows.
 type CreateCredentialsInputBody struct {
 	GrantTypes []string `json:"grant_types" schema:"grant_types" enum:"client_credentials,authorization_code" doc:"The types of grant the credentials will be used for"`
+	Scopes     []string `json:"scopes" schema:"scopes"`
 }
 
 // NewCreateCredentialsInputBody creates a pointer to an input.CreateCredentialsInputBody
-func NewCreateCredentialsInputBody(grantTypes grant.Types) *CreateCredentialsInputBody {
-	return &CreateCredentialsInputBody{GrantTypes: grantTypes.Strings()}
+func NewCreateCredentialsInputBody(grantTypes grant.Types, scopes []string) *CreateCredentialsInputBody {
+	return &CreateCredentialsInputBody{GrantTypes: grantTypes.Strings(), Scopes: scopes}
 }
 
 // GetGrantTypes retrieves the requested grant types.

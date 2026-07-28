@@ -12,13 +12,14 @@ type CredentialsTestSuite struct {
 }
 
 func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsInputBody_Success() {
-	body := NewCreateCredentialsInputBody(grant.Types{grant.AuthorizationCode})
+	body := NewCreateCredentialsInputBody(grant.Types{grant.AuthorizationCode}, []string{"one"})
 
 	testSuite.Equal([]string{grant.AuthorizationCode.String()}, body.GrantTypes)
+	testSuite.Equal([]string{"one"}, body.Scopes)
 }
 
 func (testSuite *CredentialsTestSuite) TestCreateCredentialsInputBody_GetGrantTypes_Success() {
-	body := NewCreateCredentialsInputBody(grant.Types{grant.ClientCredentials})
+	body := NewCreateCredentialsInputBody(grant.Types{grant.ClientCredentials}, []string{"one"})
 	theGrantType, err := body.GetGrantTypes()
 
 	testSuite.NoError(err)
