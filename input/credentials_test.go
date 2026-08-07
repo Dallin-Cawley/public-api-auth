@@ -1,8 +1,10 @@
 package input
 
 import (
+	"encoding/json"
 	"testing"
 
+	"github.com/Dallin-Cawley/public-api-auth/auth"
 	"github.com/Dallin-Cawley/public-api-auth/grant"
 	"github.com/stretchr/testify/suite"
 )
@@ -17,7 +19,7 @@ func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsInputBody_Success
 		WithScopes([]string{"one"}),
 	)
 
-	testSuite.Equal([]string{grant.AuthorizationCode.String()}, body.GrantTypes)
+	testSuite.Equal(grant.Types{grant.AuthorizationCode}, body.GrantTypes)
 	testSuite.Equal([]string{"https://example.com/callback"}, body.RedirectURIs)
 	testSuite.Equal([]string{"one"}, body.Scopes)
 }
@@ -28,8 +30,8 @@ func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsInputBody_BothGra
 		WithClientCredentialsGrantType(),
 	)
 
-	testSuite.Contains(body.GrantTypes, grant.AuthorizationCode.String())
-	testSuite.Contains(body.GrantTypes, grant.ClientCredentials.String())
+	testSuite.Contains(body.GrantTypes, grant.AuthorizationCode)
+	testSuite.Contains(body.GrantTypes, grant.ClientCredentials)
 	testSuite.Equal([]string{"https://example.com/callback"}, body.RedirectURIs)
 }
 
@@ -47,7 +49,7 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsInputBody_GetGrantTy
 func (testSuite *CredentialsTestSuite) TestAllOptions() {
 	jwks := map[string]any{"key": "value"}
 	body := NewCreateCredentialsInputBody(
-		WithTokenEndpointAuthMethod("client_secret_post"),
+		WithTokenEndpointAuthMethod(auth.ClientSecretPost),
 		WithResponseTypes([]string{"code"}),
 		WithClientName("my-client"),
 		WithClientURI("https://example.com"),
@@ -63,7 +65,7 @@ func (testSuite *CredentialsTestSuite) TestAllOptions() {
 		WithSoftwareVersion("1.0.0"),
 	)
 
-	testSuite.Equal("client_secret_post", body.TokenEndpointAuthMethod)
+	testSuite.Equal(auth.ClientSecretPost, body.TokenEndpointAuthMethod)
 	testSuite.Equal([]string{"code"}, body.ResponseTypes)
 	testSuite.Equal("my-client", body.ClientName)
 	testSuite.Equal("https://example.com", body.ClientURI)
@@ -81,10 +83,54 @@ func (testSuite *CredentialsTestSuite) TestAllOptions() {
 
 func (testSuite *CredentialsTestSuite) TestGetGrantTypes_Failure() {
 	body := &CreateCredentialsInputBody{
-		GrantTypes: []string{"invalid_grant"},
+		GrantTypes: grant.Types{grant.TypeUnknown},
 	}
 	_, err := body.GetGrantTypes()
 	testSuite.Error(err)
+}
+
+func (testSuite *CredentialsTestSuite) TestGetTokenEndpointAuthMethod_Success() {
+	body := NewCreateCredentialsInputBody(
+		WithTokenEndpointAuthMethod(auth.ClientSecretPost),
+	)
+	theMethod, err := body.GetTokenEndpointAuthMethod()
+
+	testSuite.NoError(err)
+	testSuite.Equal(auth.ClientSecretPost, theMethod)
+}
+
+func (testSuite *CredentialsTestSuite) TestGetTokenEndpointAuthMethod_Failure() {
+	body := &CreateCredentialsInputBody{
+		TokenEndpointAuthMethod: auth.MethodUnknown,
+	}
+	_, err := body.GetTokenEndpointAuthMethod()
+	testSuite.Error(err)
+}
+
+func (testSuite *CredentialsTestSuite) TestCreateCredentialsInputBody_Marshaling() {
+	body := NewCreateCredentialsInputBody(
+		WithTokenEndpointAuthMethod(auth.ClientSecretPost),
+		WithAuthorizationCodeGrantType([]string{"https://example.com/callback"}),
+	)
+
+	// Marshal
+	data, err := json.Marshal(body)
+	testSuite.NoError(err)
+
+	// Assert JSON contains expected values
+	jsonStr := string(data)
+	testSuite.Contains(jsonStr, `"token_endpoint_auth_method":"client_secret_post"`)
+	testSuite.Contains(jsonStr, `"grant_types":["authorization_code"]`)
+
+	// Unmarshal
+	var unmarshaled CreateCredentialsInputBody
+	err = json.Unmarshal(data, &unmarshaled)
+	testSuite.NoError(err)
+
+	// Assert unmarshaled values
+	testSuite.Equal(body.TokenEndpointAuthMethod, unmarshaled.TokenEndpointAuthMethod)
+	testSuite.Equal(body.GrantTypes, unmarshaled.GrantTypes)
+	testSuite.Equal(body.RedirectURIs, unmarshaled.RedirectURIs)
 }
 
 func Test_RunCredentialsTestSuite(t *testing.T) {

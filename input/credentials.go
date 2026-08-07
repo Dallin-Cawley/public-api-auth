@@ -1,6 +1,9 @@
 package input
 
 import (
+	"fmt"
+
+	"github.com/Dallin-Cawley/public-api-auth/auth"
 	"github.com/Dallin-Cawley/public-api-auth/grant"
 )
 
@@ -8,8 +11,8 @@ import (
 // pair for use with either the Client Credentials or Authorization Code OAuth2.0 flows.
 type CreateCredentialsInputBody struct {
 	RedirectURIs            []string       `json:"redirect_uris" schema:"redirect_uris" doc:"Array of redirection URIs"`
-	TokenEndpointAuthMethod string         `json:"token_endpoint_auth_method" schema:"token_endpoint_auth_method" doc:"Requested authentication method for the token endpoint"`
-	GrantTypes              []string       `json:"grant_types" schema:"grant_types" enum:"client_credentials,authorization_code" doc:"The types of grant the credentials will be used for"`
+	TokenEndpointAuthMethod auth.Method    `json:"token_endpoint_auth_method" schema:"token_endpoint_auth_method" doc:"Requested authentication method for the token endpoint"`
+	GrantTypes              grant.Types    `json:"grant_types" schema:"grant_types" enum:"client_credentials,authorization_code" doc:"The types of grant the credentials will be used for"`
 	ResponseTypes           []string       `json:"response_types" schema:"response_types" doc:"Array of OAuth 2.0 response type strings"`
 	ClientName              string         `json:"client_name" schema:"client_name" doc:"Human-readable name of the client"`
 	ClientURI               string         `json:"client_uri" schema:"client_uri" doc:"URL of a web page providing information about the client"`
@@ -32,7 +35,7 @@ type CreateCredentialsInputOption func(*CreateCredentialsInputBody)
 // a list of redirection URIs.
 func WithAuthorizationCodeGrantType(redirectURIs []string) CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
-		body.GrantTypes = append(body.GrantTypes, grant.AuthorizationCode.String())
+		body.GrantTypes = append(body.GrantTypes, grant.AuthorizationCode)
 		body.RedirectURIs = redirectURIs
 	}
 }
@@ -40,12 +43,12 @@ func WithAuthorizationCodeGrantType(redirectURIs []string) CreateCredentialsInpu
 // WithClientCredentialsGrantType adds the client_credentials grant type to the credentials.
 func WithClientCredentialsGrantType() CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
-		body.GrantTypes = append(body.GrantTypes, grant.ClientCredentials.String())
+		body.GrantTypes = append(body.GrantTypes, grant.ClientCredentials)
 	}
 }
 
 // WithTokenEndpointAuthMethod sets the token_endpoint_auth_method on the CreateCredentialsInputBody.
-func WithTokenEndpointAuthMethod(method string) CreateCredentialsInputOption {
+func WithTokenEndpointAuthMethod(method auth.Method) CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
 		body.TokenEndpointAuthMethod = method
 	}
@@ -150,10 +153,27 @@ func NewCreateCredentialsInputBody(opts ...CreateCredentialsInputOption) *Create
 		opt(body)
 	}
 
+	if body.TokenEndpointAuthMethod == auth.MethodUnknown {
+		body.TokenEndpointAuthMethod = auth.ClientSecretBasic
+	}
+
 	return body
 }
 
 // GetGrantTypes retrieves the requested grant types.
 func (body *CreateCredentialsInputBody) GetGrantTypes() (grant.Types, error) {
-	return grant.TypesFromString(body.GrantTypes)
+	for _, gt := range body.GrantTypes {
+		if gt == grant.TypeUnknown {
+			return nil, fmt.Errorf("invalid grant type")
+		}
+	}
+	return body.GrantTypes, nil
+}
+
+// GetTokenEndpointAuthMethod retrieves the requested token endpoint authentication method.
+func (body *CreateCredentialsInputBody) GetTokenEndpointAuthMethod() (auth.Method, error) {
+	if body.TokenEndpointAuthMethod == auth.MethodUnknown {
+		return auth.MethodUnknown, fmt.Errorf("invalid token endpoint auth method")
+	}
+	return body.TokenEndpointAuthMethod, nil
 }
