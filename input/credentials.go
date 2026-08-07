@@ -5,6 +5,7 @@ import (
 
 	"github.com/Dallin-Cawley/public-api-auth/auth"
 	"github.com/Dallin-Cawley/public-api-auth/grant"
+	"github.com/Dallin-Cawley/public-api-auth/response"
 )
 
 // CreateCredentialsInputBody represents the information necessary to generate a new client_id/client_secret
@@ -13,12 +14,11 @@ type CreateCredentialsInputBody struct {
 	RedirectURIs            []string       `json:"redirect_uris" schema:"redirect_uris" doc:"Array of redirection URIs"`
 	TokenEndpointAuthMethod auth.Method    `json:"token_endpoint_auth_method" schema:"token_endpoint_auth_method" doc:"Requested authentication method for the token endpoint"`
 	GrantTypes              grant.Types    `json:"grant_types" schema:"grant_types" enum:"client_credentials,authorization_code" doc:"The types of grant the credentials will be used for"`
-	ResponseTypes           []string       `json:"response_types" schema:"response_types" doc:"Array of OAuth 2.0 response type strings"`
+	ResponseTypes           response.Types `json:"response_types" schema:"response_types" enum:"code,token" doc:"The types of response the credentials will be used for"`
 	ClientName              string         `json:"client_name" schema:"client_name" doc:"Human-readable name of the client"`
 	ClientURI               string         `json:"client_uri" schema:"client_uri" doc:"URL of a web page providing information about the client"`
 	LogoURI                 string         `json:"logo_uri" schema:"logo_uri" doc:"URL that references a logo for the client application"`
-	Scope                   string         `json:"scope" schema:"scope" doc:"String containing a space-separated list of scope values"`
-	Scopes                  []string       `json:"scopes" schema:"scopes" doc:"Legacy array of scope values"`
+	Scopes                  []string       `json:"scopes" schema:"scopes" doc:"list of scope values"`
 	Contacts                []string       `json:"contacts" schema:"contacts" doc:"Array of strings, each containing an email address"`
 	TosURI                  string         `json:"tos_uri" schema:"tos_uri" doc:"URL that references a copy of the client's terms of service"`
 	PolicyURI               string         `json:"policy_uri" schema:"policy_uri" doc:"URL that references a copy of the client's privacy policy"`
@@ -33,7 +33,7 @@ type CreateCredentialsInputOption func(*CreateCredentialsInputBody)
 
 // WithAuthorizationCodeGrantType adds the authorization_code grant type to the credentials, and requires
 // a list of redirection URIs.
-func WithAuthorizationCodeGrantType(redirectURIs []string) CreateCredentialsInputOption {
+func WithAuthorizationCodeGrantType(redirectURIs ...string) CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
 		body.GrantTypes = append(body.GrantTypes, grant.AuthorizationCode)
 		body.RedirectURIs = redirectURIs
@@ -55,7 +55,7 @@ func WithTokenEndpointAuthMethod(method auth.Method) CreateCredentialsInputOptio
 }
 
 // WithResponseTypes sets the response_types on the CreateCredentialsInputBody.
-func WithResponseTypes(responseTypes []string) CreateCredentialsInputOption {
+func WithResponseTypes(responseTypes ...response.Type) CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
 		body.ResponseTypes = responseTypes
 	}
@@ -82,22 +82,15 @@ func WithLogoURI(uri string) CreateCredentialsInputOption {
 	}
 }
 
-// WithScope sets the scope string on the CreateCredentialsInputBody.
-func WithScope(scope string) CreateCredentialsInputOption {
-	return func(body *CreateCredentialsInputBody) {
-		body.Scope = scope
-	}
-}
-
 // WithScopes sets the legacy scopes array on the CreateCredentialsInputBody.
-func WithScopes(scopes []string) CreateCredentialsInputOption {
+func WithScopes(scopes ...string) CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
 		body.Scopes = scopes
 	}
 }
 
 // WithContacts sets the contacts on the CreateCredentialsInputBody.
-func WithContacts(contacts []string) CreateCredentialsInputOption {
+func WithContacts(contacts ...string) CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
 		body.Contacts = contacts
 	}
@@ -157,17 +150,21 @@ func NewCreateCredentialsInputBody(opts ...CreateCredentialsInputOption) *Create
 		body.TokenEndpointAuthMethod = auth.ClientSecretBasic
 	}
 
+	if len(body.ResponseTypes) == 0 {
+		body.ResponseTypes = response.Types{response.Code}
+	}
+
 	return body
 }
 
 // GetGrantTypes retrieves the requested grant types.
 func (body *CreateCredentialsInputBody) GetGrantTypes() (grant.Types, error) {
-	for _, gt := range body.GrantTypes {
-		if gt == grant.TypeUnknown {
-			return nil, fmt.Errorf("invalid grant type")
-		}
-	}
 	return body.GrantTypes, nil
+}
+
+// GetResponseTypes retrieves the requested response types.
+func (body *CreateCredentialsInputBody) GetResponseTypes() (response.Types, error) {
+	return body.ResponseTypes, nil
 }
 
 // GetTokenEndpointAuthMethod retrieves the requested token endpoint authentication method.
