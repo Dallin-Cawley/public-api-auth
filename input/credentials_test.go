@@ -41,9 +41,8 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsInputBody_GetGrantTy
 		WithClientCredentialsGrantType(),
 		WithScopes("one"),
 	)
-	theGrantType, err := body.GetGrantTypes()
+	theGrantType := body.GetGrantTypes()
 
-	testSuite.NoError(err)
 	testSuite.Equal(grant.Types{grant.ClientCredentials}, theGrantType)
 }
 
@@ -55,7 +54,7 @@ func (testSuite *CredentialsTestSuite) TestAllOptions() {
 		WithClientName("my-client"),
 		WithClientURI("https://example.com"),
 		WithLogoURI("https://example.com/logo.png"),
-		WithScopes("one"),
+		WithScopes("openid", "profile"),
 		WithContacts("admin@example.com"),
 		WithTosURI("https://example.com/tos"),
 		WithPolicyURI("https://example.com/policy"),
@@ -80,48 +79,22 @@ func (testSuite *CredentialsTestSuite) TestAllOptions() {
 	testSuite.Equal("1.0.0", body.SoftwareVersion)
 }
 
-func (testSuite *CredentialsTestSuite) TestGetGrantTypes_Failure() {
-	body := &CreateCredentialsInputBody{
-		GrantTypes: grant.Types{grant.TypeUnknown},
-	}
-	_, err := body.GetGrantTypes()
-	testSuite.Error(err)
-}
-
 func (testSuite *CredentialsTestSuite) TestCreateCredentialsInputBody_GetResponseTypes_Success() {
 	body := NewCreateCredentialsInputBody(
 		WithResponseTypes(response.Code),
 	)
-	theResponseType, err := body.GetResponseTypes()
+	theResponseType := body.GetResponseTypes()
 
-	testSuite.NoError(err)
 	testSuite.Equal(response.Types{response.Code}, theResponseType)
-}
-
-func (testSuite *CredentialsTestSuite) TestGetResponseTypes_Failure() {
-	body := &CreateCredentialsInputBody{
-		ResponseTypes: response.Types{response.TypeUnknown},
-	}
-	_, err := body.GetResponseTypes()
-	testSuite.Error(err)
 }
 
 func (testSuite *CredentialsTestSuite) TestGetTokenEndpointAuthMethod_Success() {
 	body := NewCreateCredentialsInputBody(
 		WithTokenEndpointAuthMethod(auth.ClientSecretPost),
 	)
-	theMethod, err := body.GetTokenEndpointAuthMethod()
+	theMethod := body.GetTokenEndpointAuthMethod()
 
-	testSuite.NoError(err)
 	testSuite.Equal(auth.ClientSecretPost, theMethod)
-}
-
-func (testSuite *CredentialsTestSuite) TestGetTokenEndpointAuthMethod_Failure() {
-	body := &CreateCredentialsInputBody{
-		TokenEndpointAuthMethod: auth.MethodUnknown,
-	}
-	_, err := body.GetTokenEndpointAuthMethod()
-	testSuite.Error(err)
 }
 
 func (testSuite *CredentialsTestSuite) TestCreateCredentialsInputBody_Marshaling() {

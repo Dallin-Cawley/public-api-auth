@@ -1,8 +1,6 @@
 package input
 
 import (
-	"fmt"
-
 	"github.com/Dallin-Cawley/public-api-auth/auth"
 	"github.com/Dallin-Cawley/public-api-auth/grant"
 	"github.com/Dallin-Cawley/public-api-auth/response"
@@ -158,19 +156,16 @@ func NewCreateCredentialsInputBody(opts ...CreateCredentialsInputOption) *Create
 }
 
 // GetGrantTypes retrieves the requested grant types.
-func (body *CreateCredentialsInputBody) GetGrantTypes() (grant.Types, error) {
-	return body.GrantTypes, nil
+func (body *CreateCredentialsInputBody) GetGrantTypes() grant.Types {
+	return body.GrantTypes
 }
 
 // GetResponseTypes retrieves the requested response types.
-func (body *CreateCredentialsInputBody) GetResponseTypes() (response.Types, error) {
-	return body.ResponseTypes, nil
+func (body *CreateCredentialsInputBody) GetResponseTypes() response.Types {
+	return body.ResponseTypes
 }
 
 // GetTokenEndpointAuthMethod retrieves the requested token endpoint authentication method.
-func (body *CreateCredentialsInputBody) GetTokenEndpointAuthMethod() (auth.Method, error) {
-	if body.TokenEndpointAuthMethod == auth.MethodUnknown {
-		return auth.MethodUnknown, fmt.Errorf("invalid token endpoint auth method")
-	}
-	return body.TokenEndpointAuthMethod, nil
+func (body *CreateCredentialsInputBody) GetTokenEndpointAuthMethod() auth.Method {
+	return body.TokenEndpointAuthMethod
 }
