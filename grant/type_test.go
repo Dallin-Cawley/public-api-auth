@@ -45,18 +45,11 @@ func (testSuite *TypeTestSuite) Test_MakeType_AuthorizationCode_Success() {
 	testSuite.Equal(AuthorizationCode, theGrant)
 }
 
-func (testSuite *TypeTestSuite) Test_MakeType_Unsupported_Success() {
-	theGrant, err := MakeType("unsupported")
-
-	testSuite.NoError(err)
-	testSuite.Equal(Unsupported, theGrant)
-}
-
 func (testSuite *TypeTestSuite) Test_MakeType_InvalidGrantType() {
 	theGrant, err := MakeType("invalid")
 
 	testSuite.ErrorContains(err, "invalid grant type")
-	testSuite.Equal(Type(-1), theGrant)
+	testSuite.Equal(TypeUnknown, theGrant)
 }
 
 func (testSuite *TypeTestSuite) Test_String_ClientCredentials_Success() {
@@ -65,10 +58,6 @@ func (testSuite *TypeTestSuite) Test_String_ClientCredentials_Success() {
 
 func (testSuite *TypeTestSuite) Test_String_AuthorizationCode_Success() {
 	testSuite.Equal("authorization_code", AuthorizationCode.String())
-}
-
-func (testSuite *TypeTestSuite) Test_String_Unsupported_Success() {
-	testSuite.Equal("unsupported", Unsupported.String())
 }
 
 func (testSuite *TypeTestSuite) Test_MarshalJSON_Success() {
@@ -94,7 +83,7 @@ func (testSuite *TypeTestSuite) Test_UnmarshalJSON_InvalidType() {
 	err := json.Unmarshal([]byte(`"invalid type"`), &grantType)
 
 	testSuite.ErrorContains(err, "invalid grant type")
-	testSuite.Equal(Type(-1), grantType)
+	testSuite.Equal(TypeUnknown, grantType)
 }
 
 func Test_RunGrantTypeTestSuite(t *testing.T) {
