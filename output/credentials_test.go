@@ -1,6 +1,7 @@
 package output
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/Dallin-Cawley/public-api-auth/auth"
@@ -69,6 +70,47 @@ func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsOutputBody_Succes
 	testSuite.Equal(expectedJwks, outputBody.Jwks)
 	testSuite.Equal(expectedSoftwareID, outputBody.SoftwareID)
 	testSuite.Equal(expectedSoftwareVersion, outputBody.SoftwareVersion)
+}
+
+func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarshaling_OmitsEmptyFields() {
+	outputBody := &CreateCredentialsOutputBody{
+		ClientID:     "some client id",
+		ClientSecret: "some client secret",
+	}
+
+	jsonData, err := json.Marshal(outputBody)
+	testSuite.NoError(err)
+
+	var result map[string]any
+	err = json.Unmarshal(jsonData, &result)
+	testSuite.NoError(err)
+
+	testSuite.Equal("some client id", result["client_id"])
+	testSuite.Equal("some client secret", result["client_secret"])
+
+	// Fields that should be missing
+	missingFields := []string{
+		"redirect_uris",
+		"token_endpoint_auth_method",
+		"grant_types",
+		"response_types",
+		"client_name",
+		"client_uri",
+		"logo_uri",
+		"scopes",
+		"contacts",
+		"tos_uri",
+		"policy_uri",
+		"jwks_uri",
+		"jwks",
+		"software_id",
+		"software_version",
+	}
+
+	for _, field := range missingFields {
+		_, exists := result[field]
+		testSuite.False(exists, "Field %s should be missing from JSON", field)
+	}
 }
 
 func Test_RunCredentialsTestSuite(t *testing.T) {
