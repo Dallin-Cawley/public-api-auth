@@ -15,17 +15,24 @@ func (testSuite *TokenTestSuite) TestNewCreateTokenInputBody_Success() {
 	expectedClientID := "some id"
 	expectedClientSecret := "some secret"
 
-	body := NewCreateTokenInputBody(&expectedClientID, &expectedClientSecret)
+	body := NewCreateTokenInputBody(expectedClientID, expectedClientSecret)
 
-	testSuite.Equal(&expectedClientID, body.ClientID)
-	testSuite.Equal(&expectedClientSecret, body.ClientSecret)
+	testSuite.Equal(expectedClientID, body.ClientID)
+	testSuite.Equal(expectedClientSecret, body.ClientSecret)
 	testSuite.Equal(grant.ClientCredentials.String(), body.GrantType)
+}
+
+func (testSuite *TokenTestSuite) TestScopes() {
+	body := &CreateTokenInputBody{Scope: "read write openid"}
+	expectedScopes := []string{"read", "write", "openid"}
+
+	testSuite.Equal(expectedScopes, body.Scopes())
 }
 
 func (testSuite *TokenTestSuite) TestGetGrantType_Success() {
 	expectedGrantType := grant.ClientCredentials
 
-	body := NewCreateTokenInputBody(nil, nil)
+	body := NewCreateTokenInputBody("", "")
 	theGrantType, err := body.GetGrantType()
 
 	testSuite.NoError(err)
