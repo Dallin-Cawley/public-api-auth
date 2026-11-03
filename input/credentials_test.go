@@ -136,6 +136,43 @@ func (testSuite *CredentialsTestSuite) TestScopes_SplitsOnWhitespace() {
 	testSuite.Empty((&CreateCredentialsInputBody{}).Scopes())
 }
 
+func (testSuite *CredentialsTestSuite) TestUnmarshalJSON_CollectsLocalized() {
+	var body CreateCredentialsInputBody
+	err := json.Unmarshal([]byte(`{"client_name":"n","client_name#ja-Jpan-JP":"名前","client_uri#fr":"https://x/fr","scope":"a"}`), &body)
+	testSuite.Require().NoError(err)
+
+	testSuite.Equal("n", body.ClientName)
+	testSuite.Equal("a", body.Scope)
+	testSuite.Equal(map[string]string{"client_name#ja-Jpan-JP": "名前", "client_uri#fr": "https://x/fr"}, map[string]string(body.Localized))
+}
+
+func (testSuite *CredentialsTestSuite) TestUnmarshalJSON_TypeErrorsKeepTheField() {
+	var body CreateCredentialsInputBody
+
+	var typeErr *json.UnmarshalTypeError
+	testSuite.Require().ErrorAs(json.Unmarshal([]byte(`{"contacts":"not-a-list"}`), &body), &typeErr)
+	testSuite.Equal("contacts", typeErr.Field)
+
+	testSuite.Require().ErrorAs(json.Unmarshal([]byte(`{"client_name#fr":1}`), &body), &typeErr)
+	testSuite.Equal("client_name#fr", typeErr.Field)
+}
+
+func (testSuite *CredentialsTestSuite) TestMarshalJSON_RoundTripsLocalized() {
+	body := NewCreateCredentialsInputBody(WithClientCredentialsGrantType(), WithClientName("n"), WithLocalized("client_name", "fr", "Nom"))
+
+	data, err := json.Marshal(body)
+	testSuite.Require().NoError(err)
+
+	var members map[string]any
+	testSuite.Require().NoError(json.Unmarshal(data, &members))
+	testSuite.Equal("Nom", members["client_name#fr"])
+	testSuite.NotContains(members, "Localized")
+
+	var decoded CreateCredentialsInputBody
+	testSuite.Require().NoError(json.Unmarshal(data, &decoded))
+	testSuite.Equal(body.Localized, decoded.Localized)
+}
+
 func Test_RunCredentialsTestSuite(t *testing.T) {
 	suite.Run(t, new(CredentialsTestSuite))
 }
