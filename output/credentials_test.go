@@ -62,7 +62,7 @@ func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsOutputBody_Succes
 	testSuite.Equal(expectedClientName, outputBody.ClientName)
 	testSuite.Equal(expectedClientURI, outputBody.ClientURI)
 	testSuite.Equal(expectedLogoURI, outputBody.LogoURI)
-	testSuite.Equal(expectedScopes, outputBody.Scopes)
+	testSuite.Equal("read write", outputBody.Scope)
 	testSuite.Equal(expectedContacts, outputBody.Contacts)
 	testSuite.Equal(expectedTosURI, outputBody.TosURI)
 	testSuite.Equal(expectedPolicyURI, outputBody.PolicyURI)
@@ -97,7 +97,11 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarsh
 		"client_name",
 		"client_uri",
 		"logo_uri",
+		"scope",
 		"scopes",
+		"client_id_issued_at",
+		"registration_access_token",
+		"registration_client_uri",
 		"contacts",
 		"tos_uri",
 		"policy_uri",
@@ -111,6 +115,35 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarsh
 		_, exists := result[field]
 		testSuite.False(exists, "Field %s should be missing from JSON", field)
 	}
+
+	// client_secret_expires_at is REQUIRED when a client_secret is issued, and 0 means it never expires
+	// (RFC 7591 Section 3.2.1), so it must be present even when zero.
+	expiresAt, exists := result["client_secret_expires_at"]
+	testSuite.True(exists, "client_secret_expires_at must always be present")
+	testSuite.Equal(float64(0), expiresAt)
+}
+
+func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarshaling_RegistrationFields() {
+	outputBody := &CreateCredentialsOutputBody{
+		ClientID:                "some client id",
+		ClientIDIssuedAt:        1700000000,
+		ClientSecretExpiresAt:   1800000000,
+		RegistrationAccessToken: "some token",
+		RegistrationClientURI:   "https://auth.example.com/credentials/some client id",
+		Scope:                   "read write",
+	}
+
+	jsonData, err := json.Marshal(outputBody)
+	testSuite.NoError(err)
+
+	var result map[string]any
+	testSuite.NoError(json.Unmarshal(jsonData, &result))
+
+	testSuite.Equal(float64(1700000000), result["client_id_issued_at"])
+	testSuite.Equal(float64(1800000000), result["client_secret_expires_at"])
+	testSuite.Equal("some token", result["registration_access_token"])
+	testSuite.Equal("https://auth.example.com/credentials/some client id", result["registration_client_uri"])
+	testSuite.Equal("read write", result["scope"])
 }
 
 func Test_RunCredentialsTestSuite(t *testing.T) {

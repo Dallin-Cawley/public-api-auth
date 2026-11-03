@@ -1,6 +1,8 @@
 package input
 
 import (
+	"strings"
+
 	"github.com/Dallin-Cawley/public-api-auth/auth"
 	"github.com/Dallin-Cawley/public-api-auth/grant"
 	"github.com/Dallin-Cawley/public-api-auth/response"
@@ -16,7 +18,7 @@ type CreateCredentialsInputBody struct {
 	ClientName              string         `json:"client_name" schema:"client_name" doc:"Human-readable name of the client"`
 	ClientURI               string         `json:"client_uri" schema:"client_uri" doc:"URL of a web page providing information about the client"`
 	LogoURI                 string         `json:"logo_uri" schema:"logo_uri" doc:"URL that references a logo for the client application"`
-	Scopes                  []string       `json:"scopes" schema:"scopes" doc:"list of scope values"`
+	Scope                   string         `json:"scope" schema:"scope" doc:"Space-separated list of scope values (RFC 7591 Section 2)"`
 	Contacts                []string       `json:"contacts" schema:"contacts" doc:"Array of strings, each containing an email address"`
 	TosURI                  string         `json:"tos_uri" schema:"tos_uri" doc:"URL that references a copy of the client's terms of service"`
 	PolicyURI               string         `json:"policy_uri" schema:"policy_uri" doc:"URL that references a copy of the client's privacy policy"`
@@ -80,10 +82,11 @@ func WithLogoURI(uri string) CreateCredentialsInputOption {
 	}
 }
 
-// WithScopes sets the legacy scopes array on the CreateCredentialsInputBody.
+// WithScopes sets the scope on the CreateCredentialsInputBody, joining the values with spaces as RFC 7591 Section 2
+// requires.
 func WithScopes(scopes ...string) CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
-		body.Scopes = scopes
+		body.Scope = strings.Join(scopes, " ")
 	}
 }
 
@@ -168,4 +171,9 @@ func (body *CreateCredentialsInputBody) GetResponseTypes() response.Types {
 // GetTokenEndpointAuthMethod retrieves the requested token endpoint authentication method.
 func (body *CreateCredentialsInputBody) GetTokenEndpointAuthMethod() auth.Method {
 	return body.TokenEndpointAuthMethod
+}
+
+// Scopes returns the requested scope values, split on whitespace (RFC 7591 Section 2, RFC 6749 Section 3.3).
+func (body *CreateCredentialsInputBody) Scopes() []string {
+	return strings.Fields(body.Scope)
 }

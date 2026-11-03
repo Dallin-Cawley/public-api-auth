@@ -22,7 +22,8 @@ func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsInputBody_Success
 
 	testSuite.Equal(grant.Types{grant.AuthorizationCode}, body.GrantTypes)
 	testSuite.Equal([]string{"https://example.com/callback"}, body.RedirectURIs)
-	testSuite.Equal([]string{"one"}, body.Scopes)
+	testSuite.Equal("one", body.Scope)
+	testSuite.Equal([]string{"one"}, body.Scopes())
 }
 
 func (testSuite *CredentialsTestSuite) TestNewCreateCredentialsInputBody_BothGrants() {
@@ -69,7 +70,8 @@ func (testSuite *CredentialsTestSuite) TestAllOptions() {
 	testSuite.Equal("my-client", body.ClientName)
 	testSuite.Equal("https://example.com", body.ClientURI)
 	testSuite.Equal("https://example.com/logo.png", body.LogoURI)
-	testSuite.Equal([]string{"openid", "profile"}, body.Scopes)
+	testSuite.Equal("openid profile", body.Scope)
+	testSuite.Equal([]string{"openid", "profile"}, body.Scopes())
 	testSuite.Equal([]string{"admin@example.com"}, body.Contacts)
 	testSuite.Equal("https://example.com/tos", body.TosURI)
 	testSuite.Equal("https://example.com/policy", body.PolicyURI)
@@ -124,6 +126,14 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsInputBody_Marshaling
 	testSuite.Equal(body.GrantTypes, unmarshaled.GrantTypes)
 	testSuite.Equal(body.ResponseTypes, unmarshaled.ResponseTypes)
 	testSuite.Equal(body.RedirectURIs, unmarshaled.RedirectURIs)
+}
+
+func (testSuite *CredentialsTestSuite) TestScopes_SplitsOnWhitespace() {
+	var body CreateCredentialsInputBody
+	testSuite.NoError(json.Unmarshal([]byte(`{"scope":"  read\twrite  admin "}`), &body))
+	testSuite.Equal([]string{"read", "write", "admin"}, body.Scopes())
+
+	testSuite.Empty((&CreateCredentialsInputBody{}).Scopes())
 }
 
 func Test_RunCredentialsTestSuite(t *testing.T) {

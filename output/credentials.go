@@ -1,6 +1,8 @@
 package output
 
 import (
+	"strings"
+
 	"github.com/Dallin-Cawley/public-api-auth/auth"
 	"github.com/Dallin-Cawley/public-api-auth/grant"
 	"github.com/Dallin-Cawley/public-api-auth/response"
@@ -10,6 +12,10 @@ import (
 type CreateCredentialsOutputBody struct {
 	ClientID                string         `json:"client_id" doc:"The generated client ID"`
 	ClientSecret            string         `json:"client_secret" doc:"The generated client secret"`
+	ClientIDIssuedAt        int64          `json:"client_id_issued_at,omitempty" doc:"Time at which the client_id was issued, in seconds since the Unix epoch (RFC 7591 Section 3.2.1)"`
+	ClientSecretExpiresAt   int64          `json:"client_secret_expires_at" doc:"Time at which the client_secret expires, in seconds since the Unix epoch, or 0 if it never expires (RFC 7591 Section 3.2.1)"`
+	RegistrationAccessToken string         `json:"registration_access_token,omitempty" doc:"Token used to access the client configuration endpoint (RFC 7592 Section 3)"`
+	RegistrationClientURI   string         `json:"registration_client_uri,omitempty" doc:"Fully qualified URL of the client configuration endpoint for this client (RFC 7592 Section 3)"`
 	RedirectURIs            []string       `json:"redirect_uris,omitempty" schema:"redirect_uris" doc:"Array of redirection URIs"`
 	TokenEndpointAuthMethod auth.Method    `json:"token_endpoint_auth_method,omitempty" schema:"token_endpoint_auth_method" doc:"Requested authentication method for the token endpoint"`
 	GrantTypes              grant.Types    `json:"grant_types,omitempty" schema:"grant_types" enum:"client_credentials,authorization_code" doc:"The types of grant the credentials will be used for"`
@@ -17,7 +23,7 @@ type CreateCredentialsOutputBody struct {
 	ClientName              string         `json:"client_name,omitempty" schema:"client_name" doc:"Human-readable name of the client"`
 	ClientURI               string         `json:"client_uri,omitempty" schema:"client_uri" doc:"URL of a web page providing information about the client"`
 	LogoURI                 string         `json:"logo_uri,omitempty" schema:"logo_uri" doc:"URL that references a logo for the client application"`
-	Scopes                  []string       `json:"scopes,omitempty" schema:"scopes" doc:"list of scope values"`
+	Scope                   string         `json:"scope,omitempty" schema:"scope" doc:"Space-separated list of scope values (RFC 7591 Section 2)"`
 	Contacts                []string       `json:"contacts,omitempty" schema:"contacts" doc:"Array of strings, each containing an email address"`
 	TosURI                  string         `json:"tos_uri,omitempty" schema:"tos_uri" doc:"URL that references a copy of the client's terms of service"`
 	PolicyURI               string         `json:"policy_uri,omitempty" schema:"policy_uri" doc:"URL that references a copy of the client's privacy policy"`
@@ -51,7 +57,7 @@ func NewCreateCredentialsOutputBody(
 		ClientName:              clientName,
 		ClientURI:               clientURI,
 		LogoURI:                 logoURI,
-		Scopes:                  scopes,
+		Scope:                   strings.Join(scopes, " "),
 		Contacts:                contacts,
 		TosURI:                  tosURI,
 		PolicyURI:               policyURI,
