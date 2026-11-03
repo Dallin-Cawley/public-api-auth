@@ -173,6 +173,24 @@ func (testSuite *CredentialsTestSuite) TestMarshalJSON_RoundTripsLocalized() {
 	testSuite.Equal(body.Localized, decoded.Localized)
 }
 
+func (testSuite *CredentialsTestSuite) TestUnmarshalJSON_LayersOntoAnExistingBody() {
+	var body CreateCredentialsInputBody
+	testSuite.Require().NoError(json.Unmarshal([]byte(`{"client_name":"json","client_name#fr":"Nom","software_id":"json"}`), &body))
+	testSuite.Require().NoError(json.Unmarshal([]byte(`{"client_name":"statement","client_name#de":"Name"}`), &body))
+
+	testSuite.Equal("statement", body.ClientName)
+	testSuite.Equal("json", body.SoftwareID)
+	testSuite.Equal(map[string]string{"client_name#fr": "Nom", "client_name#de": "Name"}, map[string]string(body.Localized))
+}
+
+func (testSuite *CredentialsTestSuite) TestWithSoftwareStatement() {
+	body := NewCreateCredentialsInputBody(WithSoftwareStatement("a.b.c"))
+
+	data, err := json.Marshal(body)
+	testSuite.Require().NoError(err)
+	testSuite.Contains(string(data), `"software_statement":"a.b.c"`)
+}
+
 func Test_RunCredentialsTestSuite(t *testing.T) {
 	suite.Run(t, new(CredentialsTestSuite))
 }

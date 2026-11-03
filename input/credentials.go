@@ -2,6 +2,7 @@ package input
 
 import (
 	"encoding/json"
+	"maps"
 	"strings"
 
 	"github.com/Dallin-Cawley/public-api-auth/auth"
@@ -28,6 +29,7 @@ type CreateCredentialsInputBody struct {
 	Jwks                    map[string]any `json:"jwks" schema:"jwks" doc:"Client's JSON Web Key Set [JWK] document, passed by value"`
 	SoftwareID              string         `json:"software_id" schema:"software_id" doc:"A unique identifier string assigned by the client developer"`
 	SoftwareVersion         string         `json:"software_version" schema:"software_version" doc:"A version identifier string for the client software"`
+	SoftwareStatement       string         `json:"software_statement" schema:"software_statement" doc:"A signed JWT of client metadata claims (RFC 7591 Section 2.3)"`
 	// Localized holds the language-tagged variants of the human-readable fields, such as client_name#ja-Jpan-JP
 	// (RFC 7591 Section 2.2). They're top-level members on the wire, which UnmarshalJSON and MarshalJSON handle.
 	Localized localized.Values `json:"-" schema:"-"`
@@ -144,6 +146,13 @@ func WithSoftwareVersion(version string) CreateCredentialsInputOption {
 	}
 }
 
+// WithSoftwareStatement sets the software_statement on the CreateCredentialsInputBody.
+func WithSoftwareStatement(statement string) CreateCredentialsInputOption {
+	return func(body *CreateCredentialsInputBody) {
+		body.SoftwareStatement = statement
+	}
+}
+
 // WithLocalized sets a language-tagged variant of a human-readable field, such as WithLocalized("client_name", "fr",
 // "Nom") for client_name#fr (RFC 7591 Section 2.2).
 func WithLocalized(field, tag, value string) CreateCredentialsInputOption {
@@ -205,7 +214,14 @@ func (body *CreateCredentialsInputBody) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	body.Localized = values
+
+	// Like encoding/json does for maps, decoding onto a body that already has variants adds to them, so a second
+	// document (such as a software statement's claims) can be layered over the first.
+	if body.Localized == nil {
+		body.Localized = values
+	} else {
+		maps.Copy(body.Localized, values)
+	}
 
 	return nil
 }

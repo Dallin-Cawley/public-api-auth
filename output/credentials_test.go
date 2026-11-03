@@ -165,6 +165,18 @@ func (testSuite *CredentialsTestSuite) TestMarshalJSON_WritesLocalizedAsTopLevel
 	testSuite.Equal("id", decoded.ClientID)
 }
 
+func (testSuite *CredentialsTestSuite) TestUnmarshalJSON_LayersLocalizedAndStatement() {
+	body := CreateCredentialsOutputBody{Localized: localized.Values{"client_name#fr": "Nom"}}
+	testSuite.Require().NoError(json.Unmarshal([]byte(`{"client_name#de":"Name","software_statement":"a.b.c"}`), &body))
+
+	testSuite.Equal(localized.Values{"client_name#fr": "Nom", "client_name#de": "Name"}, body.Localized)
+	testSuite.Equal("a.b.c", body.SoftwareStatement)
+
+	var typeErr *json.UnmarshalTypeError
+	testSuite.Require().ErrorAs(json.Unmarshal([]byte(`{"client_name#de":1}`), &body), &typeErr)
+	testSuite.Require().Error(json.Unmarshal([]byte(`{"client_id":1}`), &body))
+}
+
 func Test_RunCredentialsTestSuite(t *testing.T) {
 	suite.Run(t, new(CredentialsTestSuite))
 }

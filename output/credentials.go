@@ -2,6 +2,7 @@ package output
 
 import (
 	"encoding/json"
+	"maps"
 	"strings"
 
 	"github.com/Dallin-Cawley/public-api-auth/auth"
@@ -33,6 +34,7 @@ type CreateCredentialsOutputBody struct {
 	Jwks                    map[string]any `json:"jwks,omitempty" schema:"jwks" doc:"Client's JSON Web Key Set [JWK] document, passed by value"`
 	SoftwareID              string         `json:"software_id,omitempty" schema:"software_id" doc:"A unique identifier string assigned by the client developer"`
 	SoftwareVersion         string         `json:"software_version,omitempty" schema:"software_version" doc:"A version identifier string for the client software"`
+	SoftwareStatement       string         `json:"software_statement,omitempty" schema:"software_statement" doc:"The software statement used in the request, returned unmodified (RFC 7591 Section 3.2.1)"`
 	// Localized holds the language-tagged variants of the human-readable fields, such as client_name#ja-Jpan-JP
 	// (RFC 7591 Section 2.2). They're top-level members on the wire, which UnmarshalJSON and MarshalJSON handle.
 	Localized localized.Values `json:"-" schema:"-"`
@@ -84,7 +86,14 @@ func (body *CreateCredentialsOutputBody) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	body.Localized = values
+
+	// Like encoding/json does for maps, decoding onto a body that already has variants adds to them, so a second
+	// document (such as a software statement's claims) can be layered over the first.
+	if body.Localized == nil {
+		body.Localized = values
+	} else {
+		maps.Copy(body.Localized, values)
+	}
 
 	return nil
 }
