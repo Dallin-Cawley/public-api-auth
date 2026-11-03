@@ -6,6 +6,7 @@ import (
 
 	"github.com/Dallin-Cawley/public-api-auth/auth"
 	"github.com/Dallin-Cawley/public-api-auth/grant"
+	"github.com/Dallin-Cawley/public-api-auth/localized"
 	"github.com/Dallin-Cawley/public-api-auth/response"
 	"github.com/stretchr/testify/suite"
 )
@@ -144,6 +145,24 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarsh
 	testSuite.Equal("some token", result["registration_access_token"])
 	testSuite.Equal("https://auth.example.com/credentials/some client id", result["registration_client_uri"])
 	testSuite.Equal("read write", result["scope"])
+}
+
+func (testSuite *CredentialsTestSuite) TestMarshalJSON_WritesLocalizedAsTopLevelMembers() {
+	body := &CreateCredentialsOutputBody{ClientID: "id", ClientName: "n", Localized: localized.Values{"client_name#fr": "Nom"}}
+
+	data, err := json.Marshal(body)
+	testSuite.Require().NoError(err)
+
+	var members map[string]any
+	testSuite.Require().NoError(json.Unmarshal(data, &members))
+	testSuite.Equal("n", members["client_name"])
+	testSuite.Equal("Nom", members["client_name#fr"])
+	testSuite.NotContains(members, "Localized")
+
+	var decoded CreateCredentialsOutputBody
+	testSuite.Require().NoError(json.Unmarshal(data, &decoded))
+	testSuite.Equal(body.Localized, decoded.Localized)
+	testSuite.Equal("id", decoded.ClientID)
 }
 
 func Test_RunCredentialsTestSuite(t *testing.T) {

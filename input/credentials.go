@@ -1,10 +1,12 @@
 package input
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/Dallin-Cawley/public-api-auth/auth"
 	"github.com/Dallin-Cawley/public-api-auth/grant"
+	"github.com/Dallin-Cawley/public-api-auth/localized"
 	"github.com/Dallin-Cawley/public-api-auth/response"
 )
 
@@ -26,6 +28,9 @@ type CreateCredentialsInputBody struct {
 	Jwks                    map[string]any `json:"jwks" schema:"jwks" doc:"Client's JSON Web Key Set [JWK] document, passed by value"`
 	SoftwareID              string         `json:"software_id" schema:"software_id" doc:"A unique identifier string assigned by the client developer"`
 	SoftwareVersion         string         `json:"software_version" schema:"software_version" doc:"A version identifier string for the client software"`
+	// Localized holds the language-tagged variants of the human-readable fields, such as client_name#ja-Jpan-JP
+	// (RFC 7591 Section 2.2). They're top-level members on the wire, which UnmarshalJSON and MarshalJSON handle.
+	Localized localized.Values `json:"-" schema:"-"`
 }
 
 // CreateCredentialsInputOption represents a functional option for configuring a CreateCredentialsInputBody
@@ -139,6 +144,17 @@ func WithSoftwareVersion(version string) CreateCredentialsInputOption {
 	}
 }
 
+// WithLocalized sets a language-tagged variant of a human-readable field, such as WithLocalized("client_name", "fr",
+// "Nom") for client_name#fr (RFC 7591 Section 2.2).
+func WithLocalized(field, tag, value string) CreateCredentialsInputOption {
+	return func(body *CreateCredentialsInputBody) {
+		if body.Localized == nil {
+			body.Localized = localized.Values{}
+		}
+		body.Localized[field+"#"+tag] = value
+	}
+}
+
 // NewCreateCredentialsInputBody creates a pointer to an input.CreateCredentialsInputBody
 func NewCreateCredentialsInputBody(opts ...CreateCredentialsInputOption) *CreateCredentialsInputBody {
 	body := &CreateCredentialsInputBody{}
@@ -176,4 +192,31 @@ func (body *CreateCredentialsInputBody) GetTokenEndpointAuthMethod() auth.Method
 // Scopes returns the requested scope values, split on whitespace (RFC 7591 Section 2, RFC 6749 Section 3.3).
 func (body *CreateCredentialsInputBody) Scopes() []string {
 	return strings.Fields(body.Scope)
+}
+
+// UnmarshalJSON decodes the body and collects its language-tagged members into Localized (RFC 7591 Section 2.2).
+func (body *CreateCredentialsInputBody) UnmarshalJSON(data []byte) error {
+	type plain CreateCredentialsInputBody
+	if err := json.Unmarshal(data, (*plain)(body)); err != nil {
+		return err
+	}
+
+	values, err := localized.Collect(data)
+	if err != nil {
+		return err
+	}
+	body.Localized = values
+
+	return nil
+}
+
+// MarshalJSON encodes the body with Localized written back as top-level members (RFC 7591 Section 2.2).
+func (body CreateCredentialsInputBody) MarshalJSON() ([]byte, error) {
+	type plain CreateCredentialsInputBody
+	data, err := json.Marshal(plain(body))
+	if err != nil {
+		return nil, err
+	}
+
+	return localized.Append(data, body.Localized)
 }
