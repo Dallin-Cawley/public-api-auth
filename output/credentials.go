@@ -14,7 +14,7 @@ import (
 // CreateCredentialsOutputBody provides the structure of the output body in the POST /credentials request
 type CreateCredentialsOutputBody struct {
 	ClientID                string         `json:"client_id" doc:"The generated client ID"`
-	ClientSecret            string         `json:"client_secret" doc:"The generated client secret"`
+	ClientSecret            string         `json:"client_secret,omitempty" doc:"The client secret, omitted for a client that has none (token_endpoint_auth_method none)"`
 	ClientIDIssuedAt        int64          `json:"client_id_issued_at,omitempty" doc:"Time at which the client_id was issued, in seconds since the Unix epoch (RFC 7591 Section 3.2.1)"`
 	ClientSecretExpiresAt   int64          `json:"client_secret_expires_at" doc:"Time at which the client_secret expires, in seconds since the Unix epoch, or 0 if it never expires (RFC 7591 Section 3.2.1)"`
 	RegistrationAccessToken string         `json:"registration_access_token,omitempty" doc:"Token used to access the client configuration endpoint (RFC 7592 Section 3)"`

@@ -124,6 +124,18 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarsh
 	testSuite.Equal(float64(0), expiresAt)
 }
 
+func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarshaling_OmitsEmptyClientSecret() {
+	jsonData, err := json.Marshal(&CreateCredentialsOutputBody{ClientID: "some client id"})
+	testSuite.Require().NoError(err)
+
+	var result map[string]any
+	testSuite.Require().NoError(json.Unmarshal(jsonData, &result))
+
+	_, exists := result["client_secret"]
+	testSuite.False(exists, "a client without a secret has no client_secret member")
+	testSuite.Contains(result, "client_secret_expires_at")
+}
+
 func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarshaling_RegistrationFields() {
 	outputBody := &CreateCredentialsOutputBody{
 		ClientID:                "some client id",
