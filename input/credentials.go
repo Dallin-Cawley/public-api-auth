@@ -2,7 +2,6 @@ package input
 
 import (
 	"encoding/json"
-	"maps"
 	"strings"
 
 	"github.com/Dallin-Cawley/public-api-auth/auth"
@@ -216,12 +215,10 @@ func (body *CreateCredentialsInputBody) UnmarshalJSON(data []byte) error {
 	}
 
 	// Like encoding/json does for maps, decoding onto a body that already has variants adds to them, so a second
-	// document (such as a software statement's claims) can be layered over the first.
-	if body.Localized == nil {
-		body.Localized = values
-	} else {
-		maps.Copy(body.Localized, values)
-	}
+	// document (such as a software statement's claims) can be layered over the first. A variant whose language tag
+	// differs only in case from an incoming one is replaced by it, so the second document takes precedence (RFC 7591
+	// Section 2 and Section 2.2).
+	body.Localized = localized.Merge(body.Localized, values)
 
 	return nil
 }

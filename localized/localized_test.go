@@ -25,13 +25,36 @@ func (testSuite *LocalizedTestSuite) TestSplit() {
 	}
 }
 
+// DCR-013: the tag is checked against the RFC 5646 Section 2.1 ABNF, in any case.
 func (testSuite *LocalizedTestSuite) TestValidTag() {
-	for _, tag := range []string{"fr", "ja-Jpan-JP", "en-US", "zh-Hant-TW", "x-private"} {
+	for _, tag := range []string{
+		"fr", "FR", "ja-Jpan-JP", "en-US", "zh-Hant-TW", "x-private", "x-a-b", "de-CH-1901", "sl-rozaj-biske", "es-419",
+		"zh-cmn-Hans-CN", "zh-min-nan", "en-a-bbb-x-a-ccc", "de-DE-u-co-phonebk", "qaa-Qaaa-QM-x-southern", "abcd",
+		"abcdefgh", "i-klingon", "I-Default", "en-GB-oed", "sgn-BE-FR", "art-lojban", "hy-Latn-IT-arevela",
+	} {
 		testSuite.True(ValidTag(tag), tag)
 	}
-	for _, tag := range []string{"", "-fr", "fr-", "fr--CA", "fr_CA", "toolongtag", "1fr", "fr CA"} {
+	for _, tag := range []string{
+		"", "-fr", "fr-", "fr--CA", "fr_CA", "toolongtag", "1fr", "fr CA", "x", "a", "q-q-q", "a-DE", "fr-x", "en-a",
+		"en-a-b", "de-419-DE", "ab-abc-abc-abc-abc", "en-US-u", "i-nonexistent", "fré",
+	} {
 		testSuite.False(ValidTag(tag), tag)
 	}
+}
+
+// DCR-014: a merged member replaces one whose language tag differs only in case.
+func (testSuite *LocalizedTestSuite) TestMerge() {
+	testSuite.Nil(Merge(nil, nil))
+	testSuite.Equal(Values{"client_name#fr": "Nom"}, Merge(nil, Values{"client_name#fr": "Nom"}))
+
+	target := Values{"client_name#fr": "request", "client_name#de": "Name", "logo_uri#fr": "https://x/fr.png"}
+	merged := Merge(target, Values{"client_name#FR": "statement", "tos_uri#en": "https://x/tos"})
+	testSuite.Equal(Values{
+		"client_name#FR": "statement", "client_name#de": "Name", "logo_uri#fr": "https://x/fr.png", "tos_uri#en": "https://x/tos",
+	}, merged)
+
+	// The same member name simply takes the new value.
+	testSuite.Equal(Values{"client_name#fr": "b"}, Merge(Values{"client_name#fr": "a"}, Values{"client_name#fr": "b"}))
 }
 
 func (testSuite *LocalizedTestSuite) TestIsURI() {

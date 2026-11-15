@@ -183,6 +183,16 @@ func (testSuite *CredentialsTestSuite) TestUnmarshalJSON_LayersOntoAnExistingBod
 	testSuite.Equal(map[string]string{"client_name#fr": "Nom", "client_name#de": "Name"}, map[string]string(body.Localized))
 }
 
+// DCR-014: a layered document's variant replaces one whose language tag differs only in case (RFC 7591 Section 2.2),
+// so a software statement's claim takes precedence over the request's.
+func (testSuite *CredentialsTestSuite) TestUnmarshalJSON_LayeredTagDiffersInCase() {
+	var body CreateCredentialsInputBody
+	testSuite.Require().NoError(json.Unmarshal([]byte(`{"client_name#fr":"request","client_name#de":"Name"}`), &body))
+	testSuite.Require().NoError(json.Unmarshal([]byte(`{"client_name#FR":"statement"}`), &body))
+
+	testSuite.Equal(map[string]string{"client_name#FR": "statement", "client_name#de": "Name"}, map[string]string(body.Localized))
+}
+
 func (testSuite *CredentialsTestSuite) TestWithSoftwareStatement() {
 	body := NewCreateCredentialsInputBody(WithSoftwareStatement("a.b.c"))
 

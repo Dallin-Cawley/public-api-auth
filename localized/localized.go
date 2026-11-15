@@ -17,9 +17,31 @@ var Fields = []string{"client_name", "client_uri", "logo_uri", "tos_uri", "polic
 // Values maps a language-tagged member name, such as "client_name#fr", to its value.
 type Values map[string]string
 
-// tagPattern is the shape of a BCP 47 language tag (RFC 5646 Section 2.1): subtags of 1 to 8 letters and digits joined
-// by hyphens, starting with a letter subtag (or the private-use "x" prefix).
-var tagPattern = regexp.MustCompile(`^[A-Za-z]{1,8}(-[A-Za-z0-9]{1,8})*$`)
+// tagPattern is the langtag and privateuse productions of the RFC 5646 Section 2.1 ABNF, matched case-insensitively
+// (Section 2.1.1):
+//
+//	langtag    = language ["-" script] ["-" region] *("-" variant) *("-" extension) ["-" privateuse]
+//	language   = 2*3ALPHA ["-" extlang] / 4ALPHA / 5*8ALPHA      extlang = 3ALPHA *2("-" 3ALPHA)
+//	script     = 4ALPHA                                          region  = 2ALPHA / 3DIGIT
+//	variant    = 5*8alphanum / (DIGIT 3alphanum)
+//	extension  = singleton 1*("-" (2*8alphanum))                 singleton = any alphanum but "x"
+//	privateuse = "x" 1*("-" (1*8alphanum))
+var tagPattern = regexp.MustCompile(`(?i)^(?:` +
+	`(?:[a-z]{2,3}(?:-[a-z]{3}){0,3}|[a-z]{4}|[a-z]{5,8})` + // language
+	`(?:-[a-z]{4})?` + // script
+	`(?:-(?:[a-z]{2}|[0-9]{3}))?` + // region
+	`(?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*` + // variants
+	`(?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*` + // extensions
+	`(?:-x(?:-[a-z0-9]{1,8})+)?` + // private use
+	`|x(?:-[a-z0-9]{1,8})+` + // a tag that is private use only
+	`)$`)
+
+// irregularTags are the grandfathered tags of RFC 5646 Section 2.1 that don't match the langtag production. The
+// regular grandfathered tags (such as zh-min-nan) do.
+var irregularTags = []string{
+	"en-GB-oed", "i-ami", "i-bnn", "i-default", "i-enochian", "i-hak", "i-klingon", "i-lux", "i-mingo", "i-navajo",
+	"i-pwn", "i-tao", "i-tay", "i-tsu", "sgn-BE-FR", "sgn-BE-NL", "sgn-CH-DE",
+}
 
 // Split splits member into its field and language tag. ok is false when member has no "#", the tag is empty, or the
 // field isn't one of Fields, in which case member is ordinary (unknown) metadata.
@@ -37,9 +59,36 @@ func IsURI(field string) bool {
 	return strings.HasSuffix(field, "_uri")
 }
 
-// ValidTag reports whether tag is a well-formed BCP 47 language tag. It checks the syntax only, not the registry.
+// ValidTag reports whether tag is a well-formed language tag as RFC 5646 Section 2.1 defines it, which RFC 7591
+// Section 2.2 requires of the tags in claim names. It checks the syntax only, in any character case, not the subtag
+// registry: "fr", "zh-Hant-TW" and "x-private" are well-formed, "x", "a" and "q-q-q" are not.
 func ValidTag(tag string) bool {
-	return tagPattern.MatchString(tag)
+	if tagPattern.MatchString(tag) {
+		return true
+	}
+
+	return slices.ContainsFunc(irregularTags, func(irregular string) bool { return strings.EqualFold(irregular, tag) })
+}
+
+// Merge adds values to target and returns it. A language tag is compared case-insensitively (RFC 7591 Section 2.2), so
+// a member of values replaces a member of target whose name differs only in case: "client_name#FR" replaces
+// "client_name#fr". This is what lets the claims of a software statement take precedence over the request's own
+// members (RFC 7591 Section 2). A nil target is allocated when there is something to add.
+func Merge(target, values Values) Values {
+	for member, value := range values {
+		for existing := range target {
+			if existing != member && strings.EqualFold(existing, member) {
+				delete(target, existing)
+			}
+		}
+
+		if target == nil {
+			target = Values{}
+		}
+		target[member] = value
+	}
+
+	return target
 }
 
 // Collect returns the language-tagged members of the JSON object in data, or nil when there are none. A tagged

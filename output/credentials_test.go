@@ -94,7 +94,6 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarsh
 		"redirect_uris",
 		"token_endpoint_auth_method",
 		"grant_types",
-		"response_types",
 		"client_name",
 		"client_uri",
 		"logo_uri",
@@ -116,6 +115,10 @@ func (testSuite *CredentialsTestSuite) TestCreateCredentialsOutputBody_JSONMarsh
 		_, exists := result[field]
 		testSuite.False(exists, "Field %s should be missing from JSON", field)
 	}
+
+	// DCR-006: response_types is always present, as an empty array when the client has none, because an omitted
+	// member means "code" (RFC 7591 Section 2).
+	testSuite.Equal([]any{}, result["response_types"])
 
 	// client_secret_expires_at is REQUIRED when a client_secret is issued, and 0 means it never expires
 	// (RFC 7591 Section 3.2.1), so it must be present even when zero.
