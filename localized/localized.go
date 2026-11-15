@@ -73,15 +73,24 @@ func ValidTag(tag string) bool {
 // Merge adds values to target and returns it. A language tag is compared case-insensitively (RFC 7591 Section 2.2), so
 // a member of values replaces a member of target whose name differs only in case: "client_name#FR" replaces
 // "client_name#fr". This is what lets the claims of a software statement take precedence over the request's own
-// members (RFC 7591 Section 2). A nil target is allocated when there is something to add.
+// members (RFC 7591 Section 2). Members of values that differ only in case from each other are all kept: one document
+// naming the same variant twice is for the caller to reject, not something to resolve by picking one. A nil target is
+// allocated when there is something to add.
 func Merge(target, values Values) Values {
-	for member, value := range values {
-		for existing := range target {
-			if existing != member && strings.EqualFold(existing, member) {
-				delete(target, existing)
-			}
+	for existing := range target {
+		if _, same := values[existing]; same {
+			continue
 		}
 
+		for member := range values {
+			if strings.EqualFold(existing, member) {
+				delete(target, existing)
+				break
+			}
+		}
+	}
+
+	for member, value := range values {
 		if target == nil {
 			target = Values{}
 		}

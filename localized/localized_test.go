@@ -53,6 +53,11 @@ func (testSuite *LocalizedTestSuite) TestMerge() {
 		"client_name#FR": "statement", "client_name#de": "Name", "logo_uri#fr": "https://x/fr.png", "tos_uri#en": "https://x/tos",
 	}, merged)
 
+	// Variants of one document that differ only in case are both kept, for the caller to reject.
+	testSuite.Equal(Values{"client_name#fr": "a", "client_name#FR": "b"}, Merge(nil, Values{"client_name#fr": "a", "client_name#FR": "b"}))
+	testSuite.Equal(Values{"client_name#fr": "a", "client_name#FR": "b"},
+		Merge(Values{"client_name#Fr": "old"}, Values{"client_name#fr": "a", "client_name#FR": "b"}))
+
 	// The same member name simply takes the new value.
 	testSuite.Equal(Values{"client_name#fr": "b"}, Merge(Values{"client_name#fr": "a"}, Values{"client_name#fr": "b"}))
 }
