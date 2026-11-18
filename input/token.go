@@ -6,13 +6,16 @@ import (
 	"github.com/Dallin-Cawley/public-api-auth/grant"
 )
 
-// CreateTokenInputBody represents the information necessary to create a token from information
-// generated via the Client Credentials Oauth2.0 flow.
+// CreateTokenInputBody is a token request (RFC 6749 Section 4.1.3 and 4.4.2): a client_credentials grant, or the
+// exchange of an authorization code (authorization_code grant with PKCE, RFC 7636 Section 4.5).
 type CreateTokenInputBody struct {
-	ClientID     string `json:"client_id" schema:"client_id" doc:"The client ID of the application when using the Client Credentials flow"`
-	ClientSecret string `json:"client_secret" schema:"client_secret" doc:"The client secret of the application when using the Client Credentials flow"`
-	GrantType    string `json:"grant_type" schema:"grant_type" enum:"client_credentials" doc:"The type of grant to issue"`
-	Scope        string `json:"scope" schema:"scope" doc:"The scope of the token as a comma delimited list of scopes"`
+	ClientID     string `json:"client_id" schema:"client_id" doc:"The client ID, when the client doesn't authenticate with HTTP Basic"`
+	ClientSecret string `json:"client_secret" schema:"client_secret" doc:"The client secret, for client_secret_post"`
+	GrantType    string `json:"grant_type" schema:"grant_type" enum:"client_credentials,authorization_code" doc:"The type of grant to issue"`
+	Scope        string `json:"scope" schema:"scope" doc:"The scope of the token as a space delimited list of scopes (client_credentials)"`
+	Code         string `json:"code" schema:"code" doc:"The authorization code the authorization endpoint returned (authorization_code)"`
+	CodeVerifier string `json:"code_verifier" schema:"code_verifier" doc:"The PKCE code verifier of the authorization request (authorization_code)"`
+	RedirectURI  string `json:"redirect_uri" schema:"redirect_uri" doc:"The redirect_uri of the authorization request, when it included one (authorization_code)"`
 }
 
 // NewCreateTokenInputBody creates a pointer to an input.CreateTokenInputBody

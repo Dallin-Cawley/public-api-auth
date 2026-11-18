@@ -46,6 +46,14 @@ func (testSuite *TokenTestSuite) TestGetGrantType_Failure() {
 	testSuite.ErrorContains(err, "invalid grant type")
 }
 
+func (testSuite *TokenTestSuite) TestGetGrantType_AuthorizationCode() {
+	body := &CreateTokenInputBody{GrantType: "authorization_code", Code: "c", CodeVerifier: "v", RedirectURI: "https://app.example/cb"}
+	theGrantType, err := body.GetGrantType()
+
+	testSuite.NoError(err)
+	testSuite.Equal(grant.AuthorizationCode, theGrantType)
+}
+
 func Test_RunTokenTestSuite(t *testing.T) {
 	suite.Run(t, new(TokenTestSuite))
 }
