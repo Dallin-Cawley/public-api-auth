@@ -45,6 +45,14 @@ func (testSuite *TypeTestSuite) Test_MakeType_AuthorizationCode_Success() {
 	testSuite.Equal(AuthorizationCode, theGrant)
 }
 
+func (testSuite *TypeTestSuite) Test_MakeType_RefreshToken_Success() {
+	theGrant, err := MakeType("refresh_token")
+
+	testSuite.NoError(err)
+	testSuite.Equal(RefreshToken, theGrant)
+	testSuite.Equal("refresh_token", RefreshToken.String())
+}
+
 func (testSuite *TypeTestSuite) Test_MakeType_InvalidGrantType() {
 	theGrant, err := MakeType("invalid")
 

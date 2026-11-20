@@ -201,6 +201,12 @@ func (testSuite *CredentialsTestSuite) TestWithSoftwareStatement() {
 	testSuite.Contains(string(data), `"software_statement":"a.b.c"`)
 }
 
+func (testSuite *CredentialsTestSuite) TestWithRefreshTokenGrantType() {
+	body := NewCreateCredentialsInputBody(WithAuthorizationCodeGrantType("https://app.example/cb"), WithRefreshTokenGrantType())
+
+	testSuite.Equal(grant.Types{grant.AuthorizationCode, grant.RefreshToken}, body.GetGrantTypes())
+}
+
 func Test_RunCredentialsTestSuite(t *testing.T) {
 	suite.Run(t, new(CredentialsTestSuite))
 }

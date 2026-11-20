@@ -20,7 +20,7 @@ type CreateCredentialsOutputBody struct {
 	RegistrationClientURI   string      `json:"registration_client_uri,omitempty" doc:"Fully qualified URL of the client configuration endpoint for this client (RFC 7592 Section 3)"`
 	RedirectURIs            []string    `json:"redirect_uris,omitempty" schema:"redirect_uris" doc:"Array of redirection URIs"`
 	TokenEndpointAuthMethod auth.Method `json:"token_endpoint_auth_method,omitempty" schema:"token_endpoint_auth_method" doc:"Requested authentication method for the token endpoint"`
-	GrantTypes              grant.Types `json:"grant_types,omitempty" schema:"grant_types" enum:"client_credentials,authorization_code" doc:"The types of grant the credentials will be used for"`
+	GrantTypes              grant.Types `json:"grant_types,omitempty" schema:"grant_types" enum:"client_credentials,authorization_code,refresh_token" doc:"The types of grant the credentials will be used for"`
 	// ResponseTypes is always written, as [] when the client has none: an omitted response_types means "code" (RFC
 	// 7591 Section 2), and the response must return all registered metadata (Section 3.2.1).
 	ResponseTypes     response.Types `json:"response_types" schema:"response_types" enum:"code,token" doc:"The types of response the credentials will be used for; an empty array when the client has none"`

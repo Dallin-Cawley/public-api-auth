@@ -15,7 +15,7 @@ import (
 type CreateCredentialsInputBody struct {
 	RedirectURIs            []string       `json:"redirect_uris" schema:"redirect_uris" doc:"Array of redirection URIs"`
 	TokenEndpointAuthMethod auth.Method    `json:"token_endpoint_auth_method" schema:"token_endpoint_auth_method" doc:"Requested authentication method for the token endpoint"`
-	GrantTypes              grant.Types    `json:"grant_types" schema:"grant_types" enum:"client_credentials,authorization_code" doc:"The types of grant the credentials will be used for"`
+	GrantTypes              grant.Types    `json:"grant_types" schema:"grant_types" enum:"client_credentials,authorization_code,refresh_token" doc:"The types of grant the credentials will be used for"`
 	ResponseTypes           response.Types `json:"response_types" schema:"response_types" enum:"code,token" doc:"The types of response the credentials will be used for"`
 	ClientName              string         `json:"client_name" schema:"client_name" doc:"Human-readable name of the client"`
 	ClientURI               string         `json:"client_uri" schema:"client_uri" doc:"URL of a web page providing information about the client"`
@@ -50,6 +50,14 @@ func WithAuthorizationCodeGrantType(redirectURIs ...string) CreateCredentialsInp
 func WithClientCredentialsGrantType() CreateCredentialsInputOption {
 	return func(body *CreateCredentialsInputBody) {
 		body.GrantTypes = append(body.GrantTypes, grant.ClientCredentials)
+	}
+}
+
+// WithRefreshTokenGrantType adds the refresh_token grant type: the client gets refresh tokens with its authorization
+// codes (CHAMP-180).
+func WithRefreshTokenGrantType() CreateCredentialsInputOption {
+	return func(body *CreateCredentialsInputBody) {
+		body.GrantTypes = append(body.GrantTypes, grant.RefreshToken)
 	}
 }
 

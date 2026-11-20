@@ -21,6 +21,13 @@ func (testSuite *TokenTestSuite) TestNewCreateTokenOutputBody_Success() {
 	testSuite.Equal(expectedTokenType, outputBody.TokenType)
 }
 
+func (testSuite *TokenTestSuite) TestWithRefreshTokenAndScope() {
+	outputBody := NewCreateTokenOutputBody("a", "b").WithRefreshToken("r").WithScope("read")
+
+	testSuite.Equal("r", outputBody.RefreshToken)
+	testSuite.Equal("read", outputBody.Scope)
+}
+
 func Test_RunTokenTestSuite(t *testing.T) {
 	suite.Run(t, new(TokenTestSuite))
 }

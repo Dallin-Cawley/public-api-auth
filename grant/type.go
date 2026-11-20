@@ -37,12 +37,16 @@ const (
 	TypeUnknown Type = iota
 	ClientCredentials
 	AuthorizationCode
+	// RefreshToken is the refresh token grant (RFC 6749 Section 6). A client registers it next to authorization_code to
+	// get refresh tokens with its codes (CHAMP-180).
+	RefreshToken
 )
 
 var (
 	typeStringMap = map[string]Type{
 		ClientCredentials.String(): ClientCredentials,
 		AuthorizationCode.String(): AuthorizationCode,
+		RefreshToken.String():      RefreshToken,
 	}
 )
 
@@ -56,7 +60,7 @@ func MakeType(grantTypeStr string) (Type, error) {
 }
 
 func (grantType Type) String() string {
-	return []string{"type_unknown", "client_credentials", "authorization_code"}[grantType]
+	return []string{"type_unknown", "client_credentials", "authorization_code", "refresh_token"}[grantType]
 }
 
 // MarshalJSON marshals the grant.Type on the value receiver to ensure that usages of grant.Type are

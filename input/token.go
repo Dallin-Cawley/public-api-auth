@@ -11,11 +11,12 @@ import (
 type CreateTokenInputBody struct {
 	ClientID     string `json:"client_id" schema:"client_id" doc:"The client ID, when the client doesn't authenticate with HTTP Basic"`
 	ClientSecret string `json:"client_secret" schema:"client_secret" doc:"The client secret, for client_secret_post"`
-	GrantType    string `json:"grant_type" schema:"grant_type" enum:"client_credentials,authorization_code" doc:"The type of grant to issue"`
-	Scope        string `json:"scope" schema:"scope" doc:"The scope of the token as a space delimited list of scopes (client_credentials)"`
+	GrantType    string `json:"grant_type" schema:"grant_type" enum:"client_credentials,authorization_code,refresh_token" doc:"The type of grant to issue"`
+	Scope        string `json:"scope" schema:"scope" doc:"The scope of the token as a space delimited list of scopes (client_credentials; refresh_token, where it may only narrow the granted scope)"`
 	Code         string `json:"code" schema:"code" doc:"The authorization code the authorization endpoint returned (authorization_code)"`
 	CodeVerifier string `json:"code_verifier" schema:"code_verifier" doc:"The PKCE code verifier of the authorization request (authorization_code)"`
 	RedirectURI  string `json:"redirect_uri" schema:"redirect_uri" doc:"The redirect_uri of the authorization request, when it included one (authorization_code)"`
+	RefreshToken string `json:"refresh_token" schema:"refresh_token" doc:"The refresh token to exchange (refresh_token, RFC 6749 Section 6)"`
 }
 
 // NewCreateTokenInputBody creates a pointer to an input.CreateTokenInputBody
